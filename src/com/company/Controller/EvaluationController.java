@@ -1,63 +1,58 @@
 package com.company.Controller;
 
-import com.company.DbHelper.DbConnector;
-import com.company.DbHelper.EvaluationDb;
+import com.company.DbHelper.EvaluationRepository;
+import com.company.View.EvaluationView;
 
 import java.util.HashMap;
 
 public class EvaluationController {
 
-    public static void printSumOfAllOrders(DbConnector dbConnector) {
-        System.out.println(EvaluationDb.getSumOfAllOrders(dbConnector));
+    private EvaluationRepository evaluationRepository = new EvaluationRepository();
+    private EvaluationView evaluationView = new EvaluationView();
+
+    public void printSumOfAllOrders() {
+        evaluationView.printSumOfAllOrders(evaluationRepository.getSumOfAllOrders());
     }
 
-    public static void printSumOfAllOrdersPerCustomer(DbConnector dbConnector) {
-        HashMap<Integer, Integer> sumOfAllOrdersPerCustomer = EvaluationDb.getSumOfAllOrdersPerCustomer(dbConnector);
+    public void printSumOfAllOrdersPerCustomer() {
+        HashMap<Integer, Integer> sumOfAllOrdersPerCustomer = evaluationRepository.getSumOfAllOrdersPerCustomer();
 
-        // iterate trough hashmap and print it
-        for (Integer i : sumOfAllOrdersPerCustomer.keySet()) {
-            System.out.println("Kundennr: " + i + " Bestellungen: " + sumOfAllOrdersPerCustomer.get(i));
-        }
+        evaluationView.printSumOfAllOrdersPerCustomer(sumOfAllOrdersPerCustomer);
     }
 
-    public static void printSumOfAllOrdersPerTown(DbConnector dbConnector) {
-        HashMap<String, Integer> sumOfAllOrdersPerTown = EvaluationDb.getSumOfAllOrdersPerTown(dbConnector);
+    public void printSumOfAllOrdersPerTown() {
+        HashMap<String, Integer> sumOfAllOrdersPerTown = evaluationRepository.getSumOfAllOrdersPerTown();
 
-        // iterate trough hashmap and print it
-        for (String i : sumOfAllOrdersPerTown.keySet()) {
-            System.out.println("Ort: " + i + " Bestellungen: " + sumOfAllOrdersPerTown.get(i));
-        }
+        evaluationView.printSumOfAllOrdersPerTown(sumOfAllOrdersPerTown);
     }
 
-    public static void printTotalRevenue(DbConnector dbConnector) {
-        System.out.println("Gesamtumsatz: " + EvaluationDb.getTotalRevenue(dbConnector));
+    public void printTotalRevenue() {
+        double totalRevenue = evaluationRepository.getTotalRevenue();
+
+        evaluationView.printTotalRevenue(totalRevenue);
     }
 
-    public static void printSalesPerCustomer(DbConnector dbConnector) {
-        System.out.println("Umsatz je Kunde: ");
-        System.out.println(EvaluationDb.getSalesPerCustomer(dbConnector));
+    public void printSalesPerCustomer() {
+        String output = evaluationRepository.getSalesPerCustomer();
+
+        evaluationView.printSalesPerCustomer(output);
     }
 
-    public static void printSalesPerLocation(DbConnector dbConnector) {
-        System.out.println("Umsatz je Ortschaft: ");
-        System.out.println(EvaluationDb.getSalesPerLocation(dbConnector));
+    public void printSalesPerLocation() {
+        String output = evaluationRepository.getSalesPerLocation();
+
+        evaluationView.printSalesPerLocation(output);
     }
 
-    public static void printMostOftenOrderedDish(DbConnector dbConnector) {
-        HashMap<String, Integer> dish = EvaluationDb.getMostOftenOrderedDish(dbConnector);
+    public void printMostOftenOrderedDish() {
+        HashMap<String, Integer> dish = evaluationRepository.getMostOftenOrderedDish();
 
-        // iterate trough hashmap and print it
-        for (String i : dish.keySet()) {
-            System.out.println("Name: " + i + " Bestellungen: " + dish.get(i));
-        }
+        evaluationView.printMostOftenOrderedDish(dish);
     }
 
-    public static void printAllOrdersDesc(DbConnector dbConnector) {
-        HashMap<String, Integer> orders = EvaluationDb.getAllOrdersDesc(dbConnector);
+    public void printAllOrdersDesc() {
+        HashMap<String, Integer> orders = evaluationRepository.getAllOrdersDesc();
 
-        // iterate trough hashmap and print it
-        for (String i : orders.keySet()) {
-            System.out.println("Name: " + i + " Bestellungen: " + orders.get(i));
-        }
+        evaluationView.printAllOrdersDesc(orders);
     }
 }

@@ -1,26 +1,22 @@
 package com.company.Controller;
 
-import com.company.DbHelper.DbConnector;
-import com.company.DbHelper.RestaurantDb;
+import com.company.DbHelper.DeliveryPriceRepository;
+import com.company.DbHelper.LocationRepository;
+import com.company.models.DeliveryPrice;
 import com.company.models.Location;
-import com.company.models.Order;
-
-import java.util.ArrayList;
 
 public class RestaurantController {
 
-    public static void addDeliveryLocation(Location location, DbConnector dbConnector) {
-        RestaurantDb.insertLocation(location, dbConnector);
-        int locationId = RestaurantDb.getIdFromLocation(location, dbConnector);
-        RestaurantDb.insertDeliveryPrice(locationId, location, dbConnector);
-    }
+    public static void addDeliveryLocation(Location location) {
+        LocationRepository locationRepository = new LocationRepository();
+        DeliveryPriceRepository deliveryPriceRepository = new DeliveryPriceRepository();
 
-    public static void printAllOrders(DbConnector dbConnector) {
-        ArrayList<Order> orders = RestaurantDb.getAllOrders(dbConnector);
+        locationRepository.create(location);
+        // Get ID from current location
+        int locationId = locationRepository.getIdFromLocation(location);
 
-        for (int i = 0; i < orders.size(); i++) {
-            System.out.println(orders.get(i).getId() + ". Kundennr. " + orders.get(i).getCustomer().getId() +
-                    " " + orders.get(i).getDish().getType() + "  " + orders.get(i).getDate());
-        }
+        DeliveryPrice deliveryPrice = new DeliveryPrice(locationId, location.getExtraPrice());
+        // Insert deliveryPrice in table 'delivery_price' on DB
+        deliveryPriceRepository.create(deliveryPrice);
     }
 }

@@ -3,12 +3,17 @@ package com.company.DbHelper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class CsvDb {
+public class CsvRepository {
+    private DbConnector connector;
 
-    public static String getOrdersCsvString(DbConnector dbConnector) {
+    public CsvRepository() {
+        this.connector = DbConnector.getInstance();
+    }
+
+    public String getOrdersCsvString() {
         // get String (id;customer;totalPrice) for csv writer
         String csvText = "";
-        ResultSet rs = dbConnector.fetchData("SELECT order_table.id, customer, total_price+delivery_price.price AS cost " +
+        ResultSet rs = connector.fetchData("SELECT order_table.id, customer, total_price+delivery_price.price AS cost " +
                 "FROM order_table INNER JOIN delivery_price ON order_table.delivery_cost = delivery_price.id");
         try {
             while (rs.next()) {
@@ -21,15 +26,16 @@ public class CsvDb {
         } catch (SQLException e) {
             System.out.println("Error bei login!");
         } finally {
-            dbConnector.closeConnection();
+            connector.closeConnection();
         }
         return csvText;
     }
 
-    public static String getIngredientsCsvString(DbConnector dbConnector) {
+    public String getIngredientsCsvString() {
         // Get string (Zutat;Anzahl) for csv writer
         String csvText = "";
-        ResultSet rs = dbConnector.fetchData("SELECT ingredient.name, COUNT(*) AS quantity " +
+        ResultSet rs = connector.fetchData("SELECT ingredient.name, COUNT(*) AS quantity " +
+                "FROM order_details_change " +
                 "INNER JOIN ingredient ON order_details_change.ingredient = ingredient.id " +
                 "GROUP BY ingredient.name");
         try {
@@ -42,7 +48,7 @@ public class CsvDb {
         } catch (SQLException e) {
             System.out.println("Error bei login!");
         } finally {
-            dbConnector.closeConnection();
+            connector.closeConnection();
         }
         return csvText;
     }

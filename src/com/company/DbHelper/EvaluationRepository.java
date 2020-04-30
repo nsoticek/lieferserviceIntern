@@ -5,12 +5,17 @@ import java.sql.SQLException;
 
 import java.util.HashMap;
 
-public class EvaluationDb {
+public class EvaluationRepository {
+    private DbConnector connector;
 
-    public static int getSumOfAllOrders(DbConnector dbConnector) {
+    public EvaluationRepository() {
+        this.connector = DbConnector.getInstance();
+    }
+
+    public int getSumOfAllOrders() {
         // How many orders in order_table (DB)
         int ordersCount = 0;
-        ResultSet rs = dbConnector.fetchData("SELECT COUNT(*) FROM `order_table`");
+        ResultSet rs = connector.fetchData("SELECT COUNT(*) FROM `order_table`");
         if (rs == null) {
             System.out.println("Error bei getIdFromLocation! Konnte keine Daten abrufen.");
         }
@@ -21,15 +26,15 @@ public class EvaluationDb {
         } catch (SQLException e) {
             System.out.println("Error bei login!");
         } finally {
-            dbConnector.closeConnection();
+            connector.closeConnection();
         }
         return ordersCount;
     }
 
-    public static HashMap<Integer, Integer> getSumOfAllOrdersPerCustomer(DbConnector dbConnector) {
+    public HashMap<Integer, Integer> getSumOfAllOrdersPerCustomer() {
         HashMap<Integer, Integer> sumOfAllOrdersPerCustomer = new HashMap<Integer, Integer>();
 
-        ResultSet rs = dbConnector.fetchData("SELECT customer, COUNT(*) AS number_of_orders FROM order_table, customer " +
+        ResultSet rs = connector.fetchData("SELECT customer, COUNT(*) AS number_of_orders FROM order_table, customer " +
                 "WHERE customer = customer.id " +
                 "GROUP BY customer " +
                 "ORDER BY number_of_orders DESC");
@@ -46,15 +51,15 @@ public class EvaluationDb {
         } catch (SQLException e) {
             System.out.println("Error bei login!");
         } finally {
-            dbConnector.closeConnection();
+            connector.closeConnection();
         }
         return sumOfAllOrdersPerCustomer;
     }
 
-    public static HashMap<String, Integer> getSumOfAllOrdersPerTown(DbConnector dbConnector) {
+    public HashMap<String, Integer> getSumOfAllOrdersPerTown() {
         HashMap<String, Integer> sumOfAllOrdersPerTown = new HashMap<String, Integer>();
 
-        ResultSet rs = dbConnector.fetchData("SELECT customer.city, COUNT(*) AS number_of_orders FROM order_table, customer " +
+        ResultSet rs = connector.fetchData("SELECT customer.city, COUNT(*) AS number_of_orders FROM order_table, customer " +
         "WHERE customer = customer.id GROUP BY customer.city ORDER BY number_of_orders DESC");
         if (rs == null) {
             System.out.println("Error bei getSumOfAllOrdersPerTown! Konnte keine Daten abrufen.");
@@ -69,17 +74,17 @@ public class EvaluationDb {
         } catch (SQLException e) {
             System.out.println("Error bei login!");
         } finally {
-            dbConnector.closeConnection();
+            connector.closeConnection();
         }
         return sumOfAllOrdersPerTown;
     }
 
-    public static HashMap<String, Integer> getMostOftenOrderedDish(DbConnector dbConnector) {
+    public HashMap<String, Integer> getMostOftenOrderedDish() {
         HashMap<String, Integer> mostOftenOrderdDish = new HashMap<String, Integer>();
 
-        ResultSet rs = dbConnector.fetchData("SELECT dish.name, COUNT(*) AS number_of_orders FROM order_details, dish \n" +
-                "WHERE dish = dish.id \n" +
-                "GROUP BY dish \n" +
+        ResultSet rs = connector.fetchData("SELECT dish.name, COUNT(*) AS number_of_orders " +
+                "FROM order_details_change, dish " +
+                "WHERE dish = dish.id GROUP BY dish " +
                 "ORDER BY number_of_orders DESC LIMIT 1");
         if (rs == null) {
             System.out.println("Error bei getMostOftenOrderdDish! Konnte keine Daten abrufen.");
@@ -94,15 +99,15 @@ public class EvaluationDb {
         } catch (SQLException e) {
             System.out.println("Error bei login!");
         } finally {
-            dbConnector.closeConnection();
+            connector.closeConnection();
         }
         return mostOftenOrderdDish;
     }
 
-    public static HashMap<String, Integer> getAllOrdersDesc(DbConnector dbConnector) {
+    public HashMap<String, Integer> getAllOrdersDesc() {
         HashMap<String, Integer> allOrdersDec = new HashMap<String, Integer>();
 
-        ResultSet rs = dbConnector.fetchData("SELECT dish.name, COUNT(*) AS number_of_orders FROM order_details, dish \n" +
+        ResultSet rs = connector.fetchData("SELECT dish.name, COUNT(*) AS number_of_orders FROM order_details_change, dish \n" +
                 "WHERE dish = dish.id \n" +
                 "GROUP BY dish \n" +
                 "ORDER BY number_of_orders DESC");
@@ -119,14 +124,14 @@ public class EvaluationDb {
         } catch (SQLException e) {
             System.out.println("Error bei login!");
         } finally {
-            dbConnector.closeConnection();
+            connector.closeConnection();
         }
         return allOrdersDec;
     }
 
-    public static double getTotalRevenue(DbConnector dbConnector) {
+    public double getTotalRevenue() {
         double totalRevenue = 0;
-        ResultSet rs = dbConnector.fetchData("SELECT SUM(total_price+delivery_price.price) AS total_revenue " +
+        ResultSet rs = connector.fetchData("SELECT SUM(total_price+delivery_price.price) AS total_revenue " +
                 "FROM `order_table` INNER JOIN delivery_price ON order_table.delivery_cost = delivery_price.id");
         if (rs == null) {
             System.out.println("Error bei getTotalRevenue! Konnte keine Daten abrufen.");
@@ -138,14 +143,14 @@ public class EvaluationDb {
         } catch (SQLException e) {
             System.out.println("Error bei login!");
         } finally {
-            dbConnector.closeConnection();
+            connector.closeConnection();
         }
         return totalRevenue;
     }
 
-    public static String getSalesPerCustomer(DbConnector dbConnector) {
+    public String getSalesPerCustomer() {
         String output = "";
-        ResultSet rs = dbConnector.fetchData("SELECT order_table.id, customer, total_price+delivery_price.price AS cost " +
+        ResultSet rs = connector.fetchData("SELECT order_table.id, customer, total_price+delivery_price.price AS cost " +
                 "FROM order_table INNER JOIN delivery_price ON order_table.delivery_cost = delivery_price.id");
         if (rs == null) {
             System.out.println("Error bei getTotalRevenue! Konnte keine Daten abrufen.");
@@ -161,14 +166,14 @@ public class EvaluationDb {
         } catch (SQLException e) {
             System.out.println("Error bei login!");
         } finally {
-            dbConnector.closeConnection();
+            connector.closeConnection();
         }
         return output;
     }
 
-    public static String getSalesPerLocation(DbConnector dbConnector) {
+    public String getSalesPerLocation() {
         String output = "";
-        ResultSet rs = dbConnector.fetchData("SELECT order_table.id, delivery_price.location, " +
+        ResultSet rs = connector.fetchData("SELECT order_table.id, delivery_price.location, " +
                 "SUM(total_price+delivery_price.price) AS cost, COUNT(*) AS order_number FROM order_table " +
                 "INNER JOIN delivery_price ON order_table.delivery_cost = delivery_price.id " +
                 "GROUP BY delivery_price.location");
@@ -186,7 +191,7 @@ public class EvaluationDb {
         } catch (SQLException e) {
             System.out.println("Error bei login!");
         } finally {
-            dbConnector.closeConnection();
+            connector.closeConnection();
         }
         return output;
     }

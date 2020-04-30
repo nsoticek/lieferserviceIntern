@@ -8,6 +8,15 @@ public class DbConnector {
     private Statement statement = null;
     private String url = "jdbc:mysql://localhost:3306/lieferservice?user=root";
 
+    private static DbConnector instance;
+
+    public static DbConnector getInstance() {
+        if(instance == null) {
+            instance = new DbConnector();
+        }
+        return instance;
+    }
+
     private void buildConnection() {
         try {
             String databaseUrl = url;

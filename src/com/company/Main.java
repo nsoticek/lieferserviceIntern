@@ -1,10 +1,6 @@
 package com.company;
 
-import com.company.Controller.CsvController;
-import com.company.Controller.DishController;
-import com.company.Controller.EvaluationController;
-import com.company.Controller.RestaurantController;
-import com.company.DbHelper.DbConnector;
+import com.company.Controller.*;
 import com.company.models.*;
 
 import java.util.Scanner;
@@ -24,12 +20,12 @@ public class Main {
 
         System.out.println("----Dashboard----");
         boolean isNewIngredient;
-        DbConnector dbConnector = new DbConnector();
+        EvaluationController evaluationController = new EvaluationController();
 
         // Main menu
         switch (userInput(menu)) {
-            case "1": // Show orders
-                RestaurantController.printAllOrders(dbConnector);
+            case "1": // Show all orders
+                OrderController.start();
                 break;
             case "2": // Create new dish
                 String dishName = userInput("Bezeichnung der Speise: ");
@@ -46,26 +42,19 @@ public class Main {
                     isNewIngredient = checkIfAnotherIngredient("Willst du eine weitere Zutat hinzufügen: (JA/NEIN)");
                 }
                 // Insert in DB
-                DishController.insertDishAndIngredient(dish, dbConnector);
+                DishController.insertDishAndIngredient(dish);
                 break;
             case "3": // Add new city
-                String city = userInput("Gib einen Ort an: ");
-                double deliveryPrice = Double.parseDouble(userInput("Gib den Preis der Lieferung an: "));
-                Location location = new Location(city, deliveryPrice);
-                RestaurantController.addDeliveryLocation(location, dbConnector);
+                addLocation();
                 break;
             case "4": // Evaluation
-                evaluationMenu(dbConnector);
+                evaluationMenu(evaluationController);
                 break;
             case "5": // CSV export (OrderID;customerID;totalPrice)
-                String path = userInput("Wo willst du die Datei speichern? Pfad angeben: (Ohne datei!)");
-                String fileName = userInput("Dateiname: (ohne .csv)");
-                CsvController.writeCsv(path, fileName, Write.ORDER, dbConnector);
+                exportCsv(Write.ORDER);
                 break;
             case "6": // CSV export (Zutat;Anzahl)
-                path = userInput("Wo willst du die Datei speichern? Pfad angeben: (Ohne datei!)");
-                fileName = userInput("Dateiname: (ohne .csv)");
-                CsvController.writeCsv(path, fileName, Write.INGREDIENT, dbConnector);
+                exportCsv(Write.INGREDIENT);
                 break;
 
             default:
@@ -73,7 +62,7 @@ public class Main {
         }
     }
 
-    private static void evaluationMenu(DbConnector dbConnector) {
+    private static void evaluationMenu(EvaluationController evaluationController) {
         String menuEvaluation = "\n1. Wie viele Bestellungen gab es schon?\n" +
                 "2. Wie viele Bestellungen gab es je Kunde?\n" +
                 "3. Wie viele Bestellungen gab es je Ortschaft?\n" +
@@ -83,28 +72,41 @@ public class Main {
 
         switch (userInput(menuEvaluation)) {
             case "1": // How many orders
-                EvaluationController.printSumOfAllOrders(dbConnector);
+                evaluationController.printSumOfAllOrders();
                 break;
             case "2": // How many orders per customer
-                EvaluationController.printSumOfAllOrdersPerCustomer(dbConnector);
+                evaluationController.printSumOfAllOrdersPerCustomer();
                 break;
             case "3": // How many orders per town
-                EvaluationController.printSumOfAllOrdersPerTown(dbConnector);
+                evaluationController.printSumOfAllOrdersPerTown();
                 break;
             case "4": // All sales according to criteria 1 - 3 (total, per customer, per location)
-                EvaluationController.printTotalRevenue(dbConnector);
-                EvaluationController.printSalesPerCustomer(dbConnector);
-                EvaluationController.printSalesPerLocation(dbConnector);
+                evaluationController.printTotalRevenue();
+                evaluationController.printSalesPerCustomer();
+                evaluationController.printSalesPerLocation();
                 break;
             case "5": // Ordered most often
-                EvaluationController.printMostOftenOrderedDish(dbConnector);
+                evaluationController.printMostOftenOrderedDish();
                 break;
             case "6": // DESC order orderes
-                EvaluationController.printAllOrdersDesc(dbConnector);
+                evaluationController.printAllOrdersDesc();
                 break;
             default:
                 System.out.println("Error");
         }
+    }
+
+    private static void exportCsv(Write writeTyp) {
+        String path = userInput("Wo willst du die Datei speichern? Pfad angeben: (Ohne datei!)");
+        String fileName = userInput("Dateiname: (ohne .csv)");
+        CsvController.writeCsv(path, fileName, writeTyp);
+    }
+
+    private static void addLocation() {
+        String city = userInput("Gib einen Ort an: ");
+        double deliveryPrice = Double.parseDouble(userInput("Gib den Preis der Lieferung an: "));
+        Location location = new Location(city, deliveryPrice);
+        RestaurantController.addDeliveryLocation(location);
     }
 
     private static boolean checkIfAnotherIngredient(String anotherIngredient) {
@@ -121,7 +123,6 @@ public class Main {
     private static String userInput(String message) {
         Scanner scanner = new Scanner(System.in);
         System.out.println(message);
-        String userInput = scanner.nextLine();
-        return userInput;
+        return scanner.nextLine();
     }
 }
